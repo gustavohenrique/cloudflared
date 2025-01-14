@@ -1,3 +1,32 @@
+# A simple HTTP server behind Cloudflare tunnel
+
+These changes allow to run a web server locally on `tunnel` command:
+
+1. Create a simple HTTP server to manage files in `simpleserver` package.
+2. Add `go simpleserver.WithCtx(c).Start()` on `StartServer` function inside `cmd/cloudflared/tunnel/cmd.go` file.
+3. Add the line `flags = append(flags, simpleserver.Flags()...)` inside the `tunnelFlags` function, also in `cmd/cloudflared/tunnel/cmd.go`.
+
+Install dependencies:
+
+```bash
+go mod tidy
+go mod vendor
+```
+
+Compile, reduce binary size and run cloudflared:
+
+```bash
+make cloudflared
+upx -9 cloudflared
+./cloudflared tunnel --no-autoupdate --port 8080 --maxsize=100 --upload-dir=/tmp/uploads run --token <my-secret-token>
+```
+
+To upload file to server:
+
+```bash
+curl -T file.txt https://subdomain.mydomain.com
+```
+
 # Cloudflare Tunnel client
 
 Contains the command-line client for Cloudflare Tunnel, a tunneling daemon that proxies traffic from the Cloudflare network to your origins.
