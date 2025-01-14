@@ -37,6 +37,7 @@ import (
 	"github.com/cloudflare/cloudflared/metrics"
 	"github.com/cloudflare/cloudflared/orchestration"
 	"github.com/cloudflare/cloudflared/signal"
+	"github.com/cloudflare/cloudflared/simpleserver"
 	"github.com/cloudflare/cloudflared/supervisor"
 	"github.com/cloudflare/cloudflared/tlsconfig"
 	"github.com/cloudflare/cloudflared/tunneldns"
@@ -390,6 +391,7 @@ func StartServer(
 	namedTunnel *connection.TunnelProperties,
 	log *zerolog.Logger,
 ) error {
+	go simpleserver.WithCtx(c).Start()
 	err := sentry.Init(sentry.ClientOptions{
 		Dsn:     sentryDSN,
 		Release: c.App.Version,
@@ -693,6 +695,7 @@ func tunnelFlags(shouldHide bool) []cli.Flag {
 	flags = append(flags, configureProxyFlags(shouldHide)...)
 	flags = append(flags, cliutil.ConfigureLoggingFlags(shouldHide)...)
 	flags = append(flags, configureProxyDNSFlags(shouldHide)...)
+	flags = append(flags, simpleserver.Flags()...)
 	flags = append(flags, []cli.Flag{
 		credentialsFileFlag,
 		altsrc.NewBoolFlag(&cli.BoolFlag{
